@@ -1,4 +1,3 @@
-# app.py
 import streamlit as st
 import random
 import csv
@@ -8,13 +7,12 @@ from datetime import datetime
 # -------------------------
 # Configuration
 # -------------------------
-TIME_PER_QUESTION = 15  # seconds
+TIME_PER_QUESTION = 30  # ✅ 30 seconds per question
 RESULTS_CSV = "quiz_results.csv"
 APP_FOOTER = "Built by SAHIL DESAI  |  VJTI"
 
 # -------------------------
-# Question bank (example)
-# Add / replace questions as needed (covers basics -> lists/tuples/dicts -> stacks & queues)
+# Question bank
 # -------------------------
 QUESTION_BANK = [
     {"question": "What is the output of print(2**3)?", "options": ["6", "8", "9", "5"], "answer": "8"},
@@ -38,23 +36,19 @@ QUESTION_BANK = [
 # Helpers
 # -------------------------
 def init_session():
-    """Initialize session_state keys if not present."""
-    if "user" not in st.session_state:
-        st.session_state.user = None
-    if "questions" not in st.session_state:
-        st.session_state.questions = []
-    if "q_index" not in st.session_state:
-        st.session_state.q_index = 0
-    if "score" not in st.session_state:
-        st.session_state.score = 0
-    if "answers" not in st.session_state:
-        st.session_state.answers = []
-    if "question_start" not in st.session_state:
-        st.session_state.question_start = None
-    if "time_per_q" not in st.session_state:
-        st.session_state.time_per_q = TIME_PER_QUESTION
-    if "finished" not in st.session_state:
-        st.session_state.finished = False
+    """Initialize Streamlit session state"""
+    defaults = {
+        "user": None,
+        "questions": [],
+        "q_index": 0,
+        "score": 0,
+        "answers": [],
+        "question_start": None,
+        "finished": False,
+    }
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
 
 def verify_college(college_input):
     c = college_input.strip().lower()
@@ -64,9 +58,8 @@ def verify_regid(regid):
     return regid.strip().startswith("24109")
 
 def start_quiz(name, college, regid):
-    """Prepare quiz in session_state and start."""
+    """Setup quiz"""
     st.session_state.user = {"name": name.strip(), "college": college.strip(), "reg": regid.strip()}
-    # Make a copy of question bank and shuffle
     qs = QUESTION_BANK.copy()
     random.shuffle(qs)
     st.session_state.questions = qs
@@ -74,13 +67,13 @@ def start_quiz(name, college, regid):
     st.session_state.score = 0
     st.session_state.answers = []
     st.session_state.finished = False
-    # start timer for first question
     st.session_state.question_start = time.time()
 
 def save_result_to_csv(user, score, percent, status):
+    """Save results"""
     header_needed = False
     try:
-        with open(RESULTS_CSV, "r", newline="") as f:
+        with open(RESULTS_CSV, "r"):
             pass
     except FileNotFoundError:
         header_needed = True
@@ -89,10 +82,11 @@ def save_result_to_csv(user, score, percent, status):
         writer = csv.writer(f)
         if header_needed:
             writer.writerow(["Name", "College", "RegID", "Score", "Percentage", "Status", "Timestamp"])
-        writer.writerow([user["name"], user["college"], user["reg"], score, f"{percent:.2f}%", status, datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
+        writer.writerow([user["name"], user["college"], user["reg"], score, f"{percent:.2f}%", status,
+                         datetime.now().strftime("%Y-%m-%d %H:%M:%S")])
 
 # -------------------------
-# UI: Header
+# UI Setup
 # -------------------------
 st.set_page_config(page_title="VJTI Python Quiz", page_icon="🧠", layout="centered")
 st.title("🧠 VJTI Python Quiz")
@@ -101,7 +95,7 @@ st.caption("Quiz covers Python lab topics up to Stacks & Queues")
 init_session()
 
 # -------------------------
-# If user not logged in: show login form
+# Login Form
 # -------------------------
 if st.session_state.user is None:
     with st.form("login_form"):
@@ -111,15 +105,15 @@ if st.session_state.user is None:
         submitted = st.form_submit_button("Request Access")
 
     if submitted:
-        if not name.strip() or not college.strip() or not regid.strip():
+        if not name or not college or not regid:
             st.warning("Please fill all fields.")
         elif not verify_college(college):
-            st.error("Access Denied — Only VJTI students are allowed.")
+            st.error("Access Denied — Only VJTI students allowed.")
         elif not verify_regid(regid):
             st.error("Access Denied — Reg ID must start with 24109.")
         else:
             start_quiz(name, college, regid)
-            st.experimental_rerun()  # restart app to load quiz
+            st.rerun()
 
 # -------------------------
 # Quiz Interface
@@ -130,105 +124,84 @@ elif not st.session_state.finished:
     questions = st.session_state.questions
 
     if q_index >= len(questions):
-        # End the quiz (safety check)
         st.session_state.finished = True
-        st.experimental_rerun()
+        st.rerun()
 
     current_q = questions[q_index]
+
     st.markdown(f"**Student:** {user['name']}  |  **Reg ID:** {user['reg']}")
     st.markdown("---")
-
-    # show question number and text
     st.subheader(f"Question {q_index + 1} of {len(questions)}")
     st.write(current_q["question"])
 
-    # start timer if not started
+    # --- Timer logic ---
     if st.session_state.question_start is None:
         st.session_state.question_start = time.time()
 
-    # compute time left
     elapsed = time.time() - st.session_state.question_start
-    time_left = int(st.session_state.time_per_q - elapsed)
-    if time_left < 0:
-        time_left = 0
+    time_left = max(int(TIME_PER_QUESTION - elapsed), 0)
 
-    # display countdown (large)
-    timer_placeholder = st.empty()
-    timer_placeholder.markdown(f"⏱ **Time left:** {time_left} seconds")
+    # Timer UI
+    timer_col1, timer_col2 = st.columns([3, 1])
+    with timer_col1:
+        progress = time_left / TIME_PER_QUESTION
+        st.progress(progress)
+    with timer_col2:
+        st.markdown(f"⏱️ **{time_left}s left**")
 
-    # show options (radio)
+    # Options
     option = st.radio("Choose an option:", current_q["options"], key=f"opt_{q_index}")
 
-    # Buttons: Submit & Skip
-    col1, col2, col3 = st.columns([1,1,1])
+    # Buttons
+    col1, col2 = st.columns(2)
     with col1:
-        submit = st.button("Submit Answer", key=f"submit_{q_index}")
+        submit = st.button("✅ Submit", key=f"submit_{q_index}")
     with col2:
-        skip = st.button("Skip (mark wrong)", key=f"skip_{q_index}")
-    with col3:
-        reset_timer = st.button("Reset Timer", key=f"reset_{q_index}")
+        skip = st.button("⏭ Skip", key=f"skip_{q_index}")
 
-    # Reset timer button (optional)
-    if reset_timer:
-        st.session_state.question_start = time.time()
-        st.experimental_rerun()
-
-    # If submit clicked and time not expired
+    # Actions
     if submit and time_left > 0:
         selected = option
         correct = current_q["answer"]
         st.session_state.answers.append({"selected": selected, "correct": correct})
         if selected == correct:
             st.session_state.score += 1
-        # move to next question
         st.session_state.q_index += 1
-        # restart timer
         st.session_state.question_start = time.time()
-        st.experimental_rerun()
+        st.rerun()
 
-    # If skip clicked manually
     if skip:
         st.session_state.answers.append({"selected": None, "correct": current_q["answer"]})
         st.session_state.q_index += 1
         st.session_state.question_start = time.time()
-        st.experimental_rerun()
+        st.rerun()
 
-    # If time runs out -> auto mark wrong & go next
+    # Timeout auto-skip
     if time_left == 0:
-        st.warning("Time's up for this question! Moving to next...")
+        st.warning("⏰ Time's up! Moving to next question...")
         st.session_state.answers.append({"selected": None, "correct": current_q["answer"]})
         st.session_state.q_index += 1
         st.session_state.question_start = time.time()
-        st.experimental_rerun()
+        st.rerun()
 
-    # Auto-refresh page every 1 second so timer updates
-    # We use a tiny HTML + JS snippet to reload the page every 1s while quiz in progress.
-    # Session state preserves everything across reloads.
-    st.components.v1.html(
-        """
-        <script>
-        // Reload page every 1 second to update countdown.
-        setTimeout(()=>{ window.location.reload(); }, 1000);
-        </script>
-        """,
-        height=0,
-    )
+    # Live countdown refresh every 1 second
+    time.sleep(1)
+    st.rerun()
 
 # -------------------------
-# Quiz finished -> show report and save CSV
+# Result Page
 # -------------------------
 else:
     user = st.session_state.user
     total = len(st.session_state.questions)
     score = st.session_state.score
-    percent = (score / total) * 100 if total > 0 else 0
-
+    percent = (score / total) * 100
     if percent == 100:
-        status = "Excellent"
+        status = "Excellent 🌟"
     elif percent >= 60:
-        status = "Above Average"
+        status = "Above Average 👍"
     else:
-        status = "Below Average"
+        status = "Below Average ⚠️"
 
     st.success("🎉 Quiz Completed!")
     st.write(f"**Name:** {user['name']}")
@@ -237,40 +210,29 @@ else:
     st.write(f"**Percentage:** {percent:.2f}%")
     st.write(f"**Performance:** {status}")
 
-    # save to csv (append)
     save_result_to_csv(user, score, percent, status)
-    st.info("Your result has been saved to the server (quiz_results.csv).")
 
-    # show detailed answers table (selected vs correct)
-    st.markdown("### Detailed answers")
+    st.info("Your result has been saved to quiz_results.csv")
+
+    st.markdown("### Detailed Answers")
     for i, ans in enumerate(st.session_state.answers, start=1):
-        sel = ans["selected"] if ans["selected"] is not None else "— (no answer / timeout)"
+        sel = ans["selected"] if ans["selected"] else "— (timeout)"
         corr = ans["correct"]
         mark = "✅" if ans["selected"] == corr else "❌"
         st.write(f"Q{i}: Selected: **{sel}** | Correct: **{corr}** {mark}")
 
-    # End / Restart buttons
-    if st.button("Restart Quiz (same user)"):
-        # reshuffle questions and restart
-        st.session_state.questions = QUESTION_BANK.copy()
-        random.shuffle(st.session_state.questions)
+    if st.button("Restart Quiz"):
         st.session_state.q_index = 0
         st.session_state.score = 0
         st.session_state.answers = []
         st.session_state.finished = False
         st.session_state.question_start = time.time()
-        st.experimental_rerun()
+        st.rerun()
 
     if st.button("Logout"):
-        # clear user and go back to login
-        st.session_state.user = None
-        st.session_state.questions = []
-        st.session_state.q_index = 0
-        st.session_state.score = 0
-        st.session_state.answers = []
-        st.session_state.question_start = None
-        st.session_state.finished = False
-        st.experimental_rerun()
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
 
 # -------------------------
 # Footer
