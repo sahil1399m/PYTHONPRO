@@ -182,7 +182,14 @@ elif not st.session_state.finished:
     q_index = st.session_state.q_index
     TIME_PER_QUESTION = st.session_state.time_per_question
     questions = st.session_state.questions
-    current_q = questions[q_index]
+
+    # 🔥 FIX: Prevent IndexError BEFORE accessing list
+    if q_index >= len(questions):
+        st.session_state.finished = True
+        st.rerun()
+
+    current_q = questions[q_index]   # now it's safe
+
 
     # Timer
     elapsed = time.time() - st.session_state.question_start
