@@ -336,7 +336,7 @@ def save_result_to_csv(user, score, percent, status, difficulty):
     except FileNotFoundError:
         header_needed = True
 
-    with open(RESULTS_CSV, "a", newline="", encoding="utf-8") as f:
+    with open(RESULTS_CSV, "a", newline="", encoding="utf-8-sig") as f:
         writer = csv.writer(f)
         if header_needed:
             writer.writerow(["Name", "College", "RegID", "Score",
