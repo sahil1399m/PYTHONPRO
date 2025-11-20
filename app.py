@@ -329,14 +329,6 @@ def start_quiz(name, college, regid, difficulty):
 
 
 def save_result_to_csv(user, score, percent, status, difficulty):
-    header_needed = False
-    try:
-        with open(RESULTS_CSV, "r"):
-            pass
-    except FileNotFoundError:
-        header_needed = True
-
-    def save_result_to_csv(user, score, percent, status, difficulty):
 
     # generate a new file name each day
     file_name = f"quiz_results_{datetime.now().strftime('%Y-%m-%d')}.csv"
@@ -361,7 +353,6 @@ def save_result_to_csv(user, score, percent, status, difficulty):
             score, f"{percent:.2f}%", status, difficulty,
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ])
-
 
 
 # -------------------------
