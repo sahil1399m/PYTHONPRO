@@ -809,17 +809,30 @@ with col1:
     st.pyplot(fig1)
 
 # ----------- RIGHT: TIME GRAPH -----------
+# RIGHT COLUMN — TIME GRAPH
 with col2:
     st.subheader("⏱️ Time Taken Per Question")
+
     if st.session_state.time_taken:
-        fig2, ax2 = plt.subplots(figsize=(5, 5))   # <-- SAME SIZE AS PIE CHART
-        ax2.plot(range(1, len(st.session_state.time_taken)+1), st.session_state.time_taken)
+        df = pd.DataFrame({
+            "Question": list(range(1, len(st.session_state.time_taken)+1)),
+            "Time": st.session_state.time_taken
+        })
+
+        # Use original dark Matplotlib style
+        plt.style.use("dark_background")
+
+        fig2, ax2 = plt.subplots(figsize=(6, 6))
+        ax2.plot(df["Question"], df["Time"], linewidth=2)
         ax2.set_xlabel("Question Number")
         ax2.set_ylabel("Time (sec)")
-        ax2.grid(True, alpha=0.3)
+        ax2.set_title("Time Taken Per Question")
+
         st.pyplot(fig2)
+
     else:
         st.write("No timing data available.")
+
 
 
 
