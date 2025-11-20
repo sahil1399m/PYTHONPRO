@@ -796,97 +796,88 @@ else:
         st.session_state.saved = True
 
     # -------------------------
-# SIDE-BY-SIDE CHARTS
-col1, col2 = st.columns([1, 1])
+    # SIDE-BY-SIDE CHARTS
+    # -------------------------
+    col1, col2 = st.columns([1, 1])
 
-# ----------- LEFT: PIE CHART -----------
-with col1:
-    # -----------------------------------------
-    # 📊 Enhanced Neon Pie Chart
-    # -----------------------------------------
-    import matplotlib.pyplot as plt
-    from matplotlib.patches import Circle
+    # ----------- LEFT: PIE CHART -----------
+    with col1:
+        import matplotlib.pyplot as plt
+        from matplotlib.patches import Circle
 
-    st.subheader("📊 Performance Chart")
+        st.subheader("📊 Performance Chart")
 
-    # Create figure
-    fig, ax = plt.subplots(figsize=(5, 5), facecolor="none")
+        fig, ax = plt.subplots(figsize=(5, 5), facecolor="none")
 
-    colors = ["#00FFA3", "#FF4B4B"]   # neon green + neon red
+        colors = ["#00FFA3", "#FF4B4B"]   # neon green + neon red
 
-    wedges, texts, autotexts = ax.pie(
-        [score, incorrect],
-        labels=["Correct", "Incorrect"],
-        autopct="%1.1f%%",
-        colors=colors,
-        textprops={'color': "white", 'fontsize': 14, 'weight': 'bold'},
-        pctdistance=0.8,
-    )
+        wedges, texts, autotexts = ax.pie(
+            [score, incorrect],
+            labels=["Correct", "Incorrect"],
+            autopct="%1.1f%%",
+            colors=colors,
+            textprops={'color': "white", 'fontsize': 14, 'weight': 'bold'},
+            pctdistance=0.8,
+        )
 
-    # Glow / donut effect
-    centre_circle = Circle((0, 0), 0.55, fc='black')
-    fig.gca().add_artist(centre_circle)
+        centre_circle = Circle((0, 0), 0.55, fc='black')
+        fig.gca().add_artist(centre_circle)
 
-    # Improve look
-    ax.set_facecolor("none")
+        ax.set_facecolor("none")
 
-    # Set label font style
-    for t in texts:
-        t.set_fontsize(14)
-        t.set_color("white")
+        for t in texts:
+            t.set_fontsize(14)
+            t.set_color("white")
 
-    for t in autotexts:
-        t.set_fontsize(15)
-        t.set_color("white")
-        t.set_weight("bold")
+        for t in autotexts:
+            t.set_fontsize(15)
+            t.set_color("white")
+            t.set_weight("bold")
 
-    st.pyplot(fig)
+        st.pyplot(fig)
 
+    # ----------- RIGHT: TIME GRAPH -----------
+    with col2:
+        st.subheader("⏱️ Time Taken Per Question")
 
-# ----------- RIGHT: TIME GRAPH -----------
-with col2:
-    st.subheader("⏱️ Time Taken Per Question")
+        if st.session_state.time_taken:
+            df = pd.DataFrame({
+                "Question": list(range(1, len(st.session_state.time_taken)+1)),
+                "Time": st.session_state.time_taken
+            })
 
-    if st.session_state.time_taken:
-        df = pd.DataFrame({
-            "Question": list(range(1, len(st.session_state.time_taken)+1)),
-            "Time": st.session_state.time_taken
-        })
+            plt.style.use("dark_background")
 
-        plt.style.use("dark_background")
+            fig2, ax2 = plt.subplots(figsize=(6, 5))
 
-        fig2, ax2 = plt.subplots(figsize=(6, 5))
+            ax2.plot(df["Question"], df["Time"], linewidth=2, color="#00FFF7")
+            ax2.set_xlabel("Question Number")
+            ax2.set_ylabel("Time (sec)")
+            ax2.set_title("Time Taken Per Question")
 
-        ax2.plot(df["Question"], df["Time"], linewidth=2, color="#00FFF7")
-        ax2.set_xlabel("Question Number")
-        ax2.set_ylabel("Time (sec)")
-        ax2.set_title("Time Taken Per Question")
+            st.pyplot(fig2)
 
-        st.pyplot(fig2)
+        else:
+            st.write("No timing data available.")
 
-    else:
-        st.write("No timing data available.")
-
-
-
-
-    # Detailed answers
+    # ----------- DETAILED ANSWERS -----------
     st.subheader("📝 Detailed Answers")
     for i, ans in enumerate(st.session_state.answers, 1):
         selected = ans["selected"] if ans["selected"] else "Skipped/Timeout"
         mark = "✅" if selected == ans["correct"] else "❌"
         st.write(
-            f"Q{i}: Selected **{selected}**, Correct **{ans['correct']}** {mark}")
+            f"Q{i}: Selected **{selected}**, Correct **{ans['correct']}** {mark}"
+        )
 
-    # Restart button (clear session safely)
+    # Restart button
     if st.button("Restart Quiz"):
-        # clear only the keys we set (safer than deleting everything)
-        for k in ["user", "difficulty", "questions", "q_index", "score", "answers", "question_start", "finished", "time_per_question", "time_taken", "saved"]:
+        for k in ["user", "difficulty", "questions", "q_index", "score",
+                  "answers", "question_start", "finished", "time_per_question",
+                  "time_taken", "saved"]:
             if k in st.session_state:
                 del st.session_state[k]
         st.rerun()
 
-
-# footer
+# FOOTER
 st.markdown("---")
 st.markdown(f"<center>{APP_FOOTER}</center>", unsafe_allow_html=True)
