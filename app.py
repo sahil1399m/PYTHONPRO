@@ -803,10 +803,48 @@ col1, col2 = st.columns([1, 1])
 
 # ----------- LEFT: PIE CHART -----------
 with col1:
-    st.subheader("📊 Performance Chart")
-    fig1, ax1 = plt.subplots(figsize=(5, 5))       # <-- CONTROL SIZE HERE
-    ax1.pie([score, incorrect], labels=["Correct", "Incorrect"], autopct="%1.1f%%")
-    st.pyplot(fig1)
+    # -----------------------------------------
+# 📊 Enhanced Neon Pie Chart
+# -----------------------------------------
+
+import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
+
+st.subheader("📊 Performance Chart")
+
+# Create figure
+fig, ax = plt.subplots(figsize=(5, 5), facecolor="none")
+
+colors = ["#00FFA3", "#FF4B4B"]   # neon green + neon red
+
+wedges, texts, autotexts = ax.pie(
+    [score, incorrect],
+    labels=["Correct", "Incorrect"],
+    autopct="%1.1f%%",
+    colors=colors,
+    textprops={'color': "white", 'fontsize': 14, 'weight': 'bold'},
+    pctdistance=0.8,
+)
+
+# Glow / ring effect
+centre_circle = Circle((0, 0), 0.55, fc='black')
+fig.gca().add_artist(centre_circle)
+
+# Improve look
+ax.set_facecolor("none")
+ax.set_title("Performance Chart", color="white", fontsize=18, weight="bold")
+
+# Set label font size
+for t in texts:
+    t.set_fontsize(14)
+    t.set_color("white")
+
+for t in autotexts:
+    t.set_fontsize(15)
+    t.set_color("white")
+    t.set_weight("bold")
+
+st.pyplot(fig)
 
 # ----------- RIGHT: TIME GRAPH -----------
 # RIGHT COLUMN — TIME GRAPH
