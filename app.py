@@ -480,7 +480,7 @@ else:
     if st.button("Restart Quiz"):
         for k in list(st.session_state.keys()):
             del st.session_state[k]
-        st.experimental_rerun()
+        st.rerun()
 
 # footer
 st.markdown("---")
