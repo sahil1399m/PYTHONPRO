@@ -336,17 +336,32 @@ def save_result_to_csv(user, score, percent, status, difficulty):
     except FileNotFoundError:
         header_needed = True
 
-    with open(RESULTS_CSV, "a", newline="", encoding="utf-8-sig") as f:
+    def save_result_to_csv(user, score, percent, status, difficulty):
+
+    # generate a new file name each day
+    file_name = f"quiz_results_{datetime.now().strftime('%Y-%m-%d')}.csv"
+
+    header_needed = False
+    try:
+        with open(file_name, "r"):
+            pass
+    except FileNotFoundError:
+        header_needed = True
+
+    with open(file_name, "a", newline="", encoding="utf-8-sig") as f:
         writer = csv.writer(f)
         if header_needed:
-            writer.writerow(["Name", "College", "RegID", "Score",
-                            "Percentage", "Status", "Difficulty", "Timestamp"])
+            writer.writerow([
+                "Name", "College", "RegID", "Score",
+                "Percentage", "Status", "Difficulty", "Timestamp"
+            ])
 
         writer.writerow([
             user["name"], user["college"], user["reg"],
             score, f"{percent:.2f}%", status, difficulty,
             datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         ])
+
 
 
 # -------------------------
