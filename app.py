@@ -310,6 +310,50 @@ div[data-baseweb="select"] {
     animation: none !important;
   }
 }
+/* ============================= */
+/* 🔥 BIGGER QUESTION + OPTIONS  */
+/* ============================= */
+
+/* Increase size of main question text */
+.question-text, .stMarkdown h2, .stMarkdown h3 {
+    font-size: 32px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    margin-bottom: 20px !important;
+}
+
+/* Increase radio button text */
+.stRadio > div > label {
+    font-size: 22px !important;
+    padding: 10px 4px !important;
+    color: #fff !important;
+}
+
+/* Make radio circle bigger */
+.stRadio > div > div[role="radiogroup"] > label > div:first-child {
+    width: 22px !important;
+    height: 22px !important;
+    border-width: 3px !important;
+}
+
+/* Increase spacing between options */
+.stRadio > div > div[role="radiogroup"] > label {
+    margin-bottom: 12px !important;
+}
+
+/* Submit + Skip buttons bigger */
+.stButton > button {
+    padding: 16px 30px !important;
+    font-size: 20px !important;
+    border-radius: 12px !important;
+}
+
+/* Enlarge progress bar */
+.stProgress > div > div {
+    height: 12px !important;
+    border-radius: 20px !important;
+}
+
 """
 
 set_background(CSS)
@@ -319,6 +363,7 @@ set_background(CSS)
 # -------------------------
 st.title("🚀 Start Your Python Quiz")
 st.caption("Enter details and press Start — good luck!")
+
 
 # -------------------------
 # LOGIN / QUIZ / RESULTS
@@ -405,7 +450,7 @@ elif not st.session_state.finished:
         st.write(f"**{time_left} seconds**")
 
     with left:
-        st.subheader(current_q["question"])
+        st.markdown(f"<div class='question-text'>{current_q['question']}</div>", unsafe_allow_html=True)
         option = st.radio("", current_q["options"], key=f"opt_{q_index}")
 
         def handle_answer(opt):
