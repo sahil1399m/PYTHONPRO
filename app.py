@@ -797,57 +797,54 @@ else:
 
     # -------------------------
 # SIDE-BY-SIDE CHARTS
-# -------------------------
-
 col1, col2 = st.columns([1, 1])
 
 # ----------- LEFT: PIE CHART -----------
 with col1:
     # -----------------------------------------
-# 📊 Enhanced Neon Pie Chart
-# -----------------------------------------
+    # 📊 Enhanced Neon Pie Chart
+    # -----------------------------------------
+    import matplotlib.pyplot as plt
+    from matplotlib.patches import Circle
 
-import matplotlib.pyplot as plt
-from matplotlib.patches import Circle
+    st.subheader("📊 Performance Chart")
 
-st.subheader("📊 Performance Chart")
+    # Create figure
+    fig, ax = plt.subplots(figsize=(5, 5), facecolor="none")
 
-# Create figure
-fig, ax = plt.subplots(figsize=(5, 5), facecolor="none")
+    colors = ["#00FFA3", "#FF4B4B"]   # neon green + neon red
 
-colors = ["#00FFA3", "#FF4B4B"]   # neon green + neon red
+    wedges, texts, autotexts = ax.pie(
+        [score, incorrect],
+        labels=["Correct", "Incorrect"],
+        autopct="%1.1f%%",
+        colors=colors,
+        textprops={'color': "white", 'fontsize': 14, 'weight': 'bold'},
+        pctdistance=0.8,
+    )
 
-wedges, texts, autotexts = ax.pie(
-    [score, incorrect],
-    labels=["Correct", "Incorrect"],
-    autopct="%1.1f%%",
-    colors=colors,
-    textprops={'color': "white", 'fontsize': 14, 'weight': 'bold'},
-    pctdistance=0.8,
-)
+    # Glow / donut effect
+    centre_circle = Circle((0, 0), 0.55, fc='black')
+    fig.gca().add_artist(centre_circle)
 
-# Glow / ring effect
-centre_circle = Circle((0, 0), 0.55, fc='black')
-fig.gca().add_artist(centre_circle)
+    # Improve look
+    ax.set_facecolor("none")
+    ax.set_title("Performance Chart", color="white", fontsize=18, weight="bold")
 
-# Improve look
-ax.set_facecolor("none")
-ax.set_title("Performance Chart", color="white", fontsize=18, weight="bold")
+    # Set label font style
+    for t in texts:
+        t.set_fontsize(14)
+        t.set_color("white")
 
-# Set label font size
-for t in texts:
-    t.set_fontsize(14)
-    t.set_color("white")
+    for t in autotexts:
+        t.set_fontsize(15)
+        t.set_color("white")
+        t.set_weight("bold")
 
-for t in autotexts:
-    t.set_fontsize(15)
-    t.set_color("white")
-    t.set_weight("bold")
+    st.pyplot(fig)
 
-st.pyplot(fig)
 
 # ----------- RIGHT: TIME GRAPH -----------
-# RIGHT COLUMN — TIME GRAPH
 with col2:
     st.subheader("⏱️ Time Taken Per Question")
 
@@ -857,11 +854,11 @@ with col2:
             "Time": st.session_state.time_taken
         })
 
-        # Use original dark Matplotlib style
         plt.style.use("dark_background")
 
-        fig2, ax2 = plt.subplots(figsize=(6, 6))
-        ax2.plot(df["Question"], df["Time"], linewidth=2)
+        fig2, ax2 = plt.subplots(figsize=(6, 5))
+
+        ax2.plot(df["Question"], df["Time"], linewidth=2, color="#00FFF7")
         ax2.set_xlabel("Question Number")
         ax2.set_ylabel("Time (sec)")
         ax2.set_title("Time Taken Per Question")
