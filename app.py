@@ -799,26 +799,28 @@ else:
 # SIDE-BY-SIDE CHARTS
 # -------------------------
 
-col1, col2 = st.columns(2)
+col1, col2 = st.columns([1, 1])
 
-# Pie Chart (Left)
+# ----------- LEFT: PIE CHART -----------
 with col1:
     st.subheader("📊 Performance Chart")
-    fig, ax = plt.subplots()
-    ax.pie([score, incorrect], labels=["Correct", "Incorrect"], autopct="%1.1f%%")
-    st.pyplot(fig)
+    fig1, ax1 = plt.subplots(figsize=(5, 5))       # <-- CONTROL SIZE HERE
+    ax1.pie([score, incorrect], labels=["Correct", "Incorrect"], autopct="%1.1f%%")
+    st.pyplot(fig1)
 
-# Time Chart (Right)
+# ----------- RIGHT: TIME GRAPH -----------
 with col2:
     st.subheader("⏱️ Time Taken Per Question")
     if st.session_state.time_taken:
-        df = pd.DataFrame({
-            "Question": list(range(1, len(st.session_state.time_taken) + 1)),
-            "Time": st.session_state.time_taken
-        })
-        st.line_chart(df.set_index("Question"))
+        fig2, ax2 = plt.subplots(figsize=(5, 5))   # <-- SAME SIZE AS PIE CHART
+        ax2.plot(range(1, len(st.session_state.time_taken)+1), st.session_state.time_taken)
+        ax2.set_xlabel("Question Number")
+        ax2.set_ylabel("Time (sec)")
+        ax2.grid(True, alpha=0.3)
+        st.pyplot(fig2)
     else:
         st.write("No timing data available.")
+
 
 
     # Detailed answers
