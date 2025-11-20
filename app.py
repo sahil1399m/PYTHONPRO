@@ -829,7 +829,6 @@ with col1:
 
     # Improve look
     ax.set_facecolor("none")
-    ax.set_title("Performance Chart", color="white", fontsize=18, weight="bold")
 
     # Set label font style
     for t in texts:
