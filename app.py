@@ -795,21 +795,31 @@ else:
                            st.session_state.difficulty)
         st.session_state.saved = True
 
-    # Pie chart
+    # -------------------------
+# SIDE-BY-SIDE CHARTS
+# -------------------------
+
+col1, col2 = st.columns(2)
+
+# Pie Chart (Left)
+with col1:
     st.subheader("📊 Performance Chart")
     fig, ax = plt.subplots()
-    ax.pie([score, incorrect], labels=[
-           "Correct", "Incorrect"], autopct="%1.1f%%")
+    ax.pie([score, incorrect], labels=["Correct", "Incorrect"], autopct="%1.1f%%")
     st.pyplot(fig)
 
-    # Time chart
-    st.subheader("📈 Time Taken Per Question")
+# Time Chart (Right)
+with col2:
+    st.subheader("⏱️ Time Taken Per Question")
     if st.session_state.time_taken:
-        df = pd.DataFrame({"Question": list(range(1, len(st.session_state.time_taken)+1)),
-                           "Time": st.session_state.time_taken})
+        df = pd.DataFrame({
+            "Question": list(range(1, len(st.session_state.time_taken) + 1)),
+            "Time": st.session_state.time_taken
+        })
         st.line_chart(df.set_index("Question"))
     else:
         st.write("No timing data available.")
+
 
     # Detailed answers
     st.subheader("📝 Detailed Answers")
