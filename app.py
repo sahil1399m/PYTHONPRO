@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 # CONFIG
 # -------------------------
 RESULTS_CSV = "quiz_results.csv"
-APP_FOOTER = "Built by SAHIL DESAI | VJTI"
+APP_FOOTER = "Built by KGS | VJTI"
 
 # -------------------------
 # QUESTION BANKS (SMALL SET)
